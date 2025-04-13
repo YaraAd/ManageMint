@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "850971368175",
+    "project_id": "mangemint-cf96d",
+    "storage_bucket": "mangemint-cf96d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:850971368175:android:2c6c28adf8d1e628f1991a",
+        "android_client_info": {
+          "package_name": "com.example.managemint"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4OZ9vLmJe51D5Ed3vhi9r2ayW1MlECPg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
