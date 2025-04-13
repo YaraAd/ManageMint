@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:managemint/Core/Services/get_it_services.dart';
+import 'package:managemint/Features/Authentication/Presentation/Manager/Cubits/signin_cubit/signin_cubit.dart';
 import 'package:managemint/Features/Authentication/Presentation/Views/loginPage.dart';
 import 'package:managemint/Features/Authentication/Presentation/Views/signupPage.dart';
 import 'package:managemint/constants.dart';
@@ -11,6 +14,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  setupGetit();
   runApp(MyApp());
 }
 
