@@ -11,8 +11,12 @@ import 'package:managemint/Features/Authentication/Domain/repo/auth_repo.dart';
 import 'package:managemint/Features/Authentication/Presentation/Manager/Cubits/signin_cubit/signin_cubit.dart';
 import 'package:managemint/Features/Authentication/Presentation/Manager/Cubits/signin_cubit/signin_state.dart';
 import 'package:managemint/Features/Authentication/Presentation/Views/Widgets/haveAccount.dart';
+import 'package:managemint/Features/Authentication/Presentation/Views/signupPage.dart';
 import 'package:managemint/constants.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import '../../../Task/Presentation/views/developerView.dart';
+import '../../../Task/Presentation/views/projectManagerView.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,10 +25,23 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-TextEditingController emailController = TextEditingController();
-TextEditingController passwordController = TextEditingController();
-
 class _LoginPageState extends State<LoginPage> {
+
+  late TextEditingController emailController;
+  late TextEditingController passwordController;
+  @override
+  void initState() {
+    super.initState();
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
   bool isLoading = false;
   GlobalKey<FormState> formKey = GlobalKey();
   Widget build(BuildContext context) {
@@ -37,6 +54,17 @@ class _LoginPageState extends State<LoginPage> {
           return BlocConsumer<SigninCubit, SigninState>(
             listener: (BuildContext context, state) {
               if (state is SigninSuccess) {
+                 if(state.userEntity.role == 'Project Manager'){
+                   Navigator.pushReplacement(context, MaterialPageRoute(builder:(context)=>  Projectmanagerview(user: state.userEntity,)));
+
+                 }else if (state.userEntity.role == 'Developer'){
+                   Navigator.pushReplacement(context, MaterialPageRoute(builder:(context)=>  Developer(userEntity:  state.userEntity,)));
+
+                 }
+                 else {
+                   Navigator.pushReplacement(context, MaterialPageRoute(builder:(context)=>  SignupPage()));
+
+                 }
               } else if (state is SigninFailure) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text(state.errorMessage),
@@ -59,10 +87,11 @@ class _LoginPageState extends State<LoginPage> {
                     width: double.maxFinite,
                     child: SingleChildScrollView(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Padding(padding: EdgeInsets.only(top: 60.h)),
+                          Padding(padding: EdgeInsets.only(top: 120.h)),
 
                           Text(
                             'Login',
@@ -84,12 +113,12 @@ class _LoginPageState extends State<LoginPage> {
                               if (formKey.currentState!.validate()) {
                                 BlocProvider.of<SigninCubit>(context)
                                     .createUserwithEmailandPassword(
-                                        email: emailController.text,
-                                        password: passwordController.text);
+                                        email: emailController.text.trim(),
+                                        password: passwordController.text.trim());
                               }
                             },
                           ),
-                          HaveAccount(have: 'Don\'t have', page: 'Signup'),
+                         // HaveAccount(have: 'Don\'t have', page: 'Signup'),
                         ],
                       ),
                     ),

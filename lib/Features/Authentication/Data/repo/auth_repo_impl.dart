@@ -11,11 +11,11 @@ class AuthRepoImpl extends AuthRepo {
   AuthRepoImpl({required this.firebaseAuthServices});
   @override
   Future<Either<Failure, UserEntity>> CreateUserWithEmailandPassword(
-      String email, String password) async {
+      String email, String password, String userName, String userRole) async {
     try {
-      var user = await firebaseAuthServices.createUserwithEmialandPassword(
-          email: email, password: password);
-      return right(UserModel.fromFirebaseUser(user));
+      var user = await firebaseAuthServices.createUserWithEmailAndPassword(
+          email: email, password: password, userName: userName, role: userRole);
+      return right(UserModel.fromFirebaseUser(user, userName, userRole, user.uid));
     } on CustomExceptions catch (e) {
       return left(ServerFailure(e.message));
     }
@@ -25,9 +25,23 @@ class AuthRepoImpl extends AuthRepo {
   Future<Either<Failure, UserEntity>> SigninWithEmailandPassword(
       String email, String password) async {
     try {
-      var user = await firebaseAuthServices.signInWithEmailandPassword(
+      var user = await firebaseAuthServices.signInWithEmailAndPassword(
           email: email, password: password);
-      return right(UserModel.fromFirebaseUser(user));
+      //get username and role
+      final userData = await firebaseAuthServices.getUserDate(user.uid);
+
+      return right(UserModel.fromFirebaseUser(
+          user, userData['role']!, userData['userName']!, user.uid));
+    } on CustomExceptions catch (e) {
+      return left(ServerFailure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> SignOut() async {
+    try {
+      await firebaseAuthServices.signOutUser();
+      return right('Logged out successfully!');
     } on CustomExceptions catch (e) {
       return left(ServerFailure(e.message));
     }

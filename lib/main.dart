@@ -5,8 +5,14 @@ import 'package:managemint/Core/Services/get_it_services.dart';
 import 'package:managemint/Features/Authentication/Presentation/Manager/Cubits/signin_cubit/signin_cubit.dart';
 import 'package:managemint/Features/Authentication/Presentation/Views/loginPage.dart';
 import 'package:managemint/Features/Authentication/Presentation/Views/signupPage.dart';
+import 'package:managemint/Features/Task/Presentation/views/manager/projectManger_tasks_cubit/create_task_cubit.dart';
 import 'package:managemint/constants.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'Core/Services/admin_auth_service.dart';
+import 'Core/Services/firebase_task_service.dart';
+import 'Features/Authentication/Domain/repo/auth_repo.dart';
+import 'Features/Authentication/Presentation/Manager/Cubits/Signout_cubit/signout_cubit.dart';
+import 'Features/Task/Data/repo/task_repo_impl.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -15,7 +21,27 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   setupGetit();
-  runApp(MyApp());
+  final adminService = AdminService();
+  await adminService.ensureAdminAccountExists();
+
+  runApp(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) =>
+                CreateTaskCubit(
+                    taskRepo: TaskRepoImpl(
+                        firebaseTaskServices: FirebaseTaskService())
+                ),
+          ),
+          BlocProvider(
+            create: (context) => SignOutCubit(
+              authRepo:  getIt<AuthRepo>(),
+            ),
+          ),
+        ],
+        child: MyApp(),
+      ));
 }
 
 class MyApp extends StatelessWidget {

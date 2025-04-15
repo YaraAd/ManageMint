@@ -10,40 +10,75 @@ import 'package:managemint/Core/utils/styles.dart';
 import 'package:managemint/Features/Authentication/Domain/repo/auth_repo.dart';
 import 'package:managemint/Features/Authentication/Presentation/Manager/Cubits/signup_cubit/signup_cubit.dart';
 import 'package:managemint/Features/Authentication/Presentation/Manager/Cubits/signup_cubit/signup_state.dart';
-import 'package:managemint/Features/Authentication/Presentation/Views/Widgets/haveAccount.dart';
+import 'package:managemint/Features/Authentication/Presentation/Views/Widgets/user_role_selector_widget.dart';
+import 'package:managemint/Features/Authentication/Presentation/Views/loginPage.dart';
 import 'package:managemint/constants.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+
+import '../Manager/Cubits/Signout_cubit/signout_cubit.dart';
 
 /*Yara Adel*/
 
 // ignore: must_be_immutable
-class SignupPage extends StatelessWidget {
+class SignupPage extends StatefulWidget {
   SignupPage({super.key});
+
   static String id = 'SignupPage';
+
+  @override
+  State<SignupPage> createState() => _SignupPageState();
+}
+
+class _SignupPageState extends State<SignupPage> {
   final TextEditingController firstNameController = TextEditingController();
+
   final TextEditingController lastNameController = TextEditingController();
+
   final TextEditingController userNameController = TextEditingController();
+
   final TextEditingController emailController = TextEditingController();
+
   final TextEditingController passwordController = TextEditingController();
+  String? selectedRole;
+
   final InputName userNameInput =
-      InputName(label: 'User Name', InitialValue: '');
+  InputName(label: 'User Name', InitialValue: '');
+
   final InputName firstNameInput =
-      InputName(label: 'First Name', InitialValue: '');
+  InputName(label: 'First Name', InitialValue: '');
+
   final InputName lastNameInput =
-      InputName(label: 'Last Name', InitialValue: '');
+  InputName(label: 'Last Name', InitialValue: '');
+
   GlobalKey<FormState> formKey = GlobalKey();
+
   bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => SignupCubit(
-        getIt<AuthRepo>(),
-      ),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) =>
+              SignupCubit(
+                getIt<AuthRepo>(),
+              ),
+        ),
+        BlocProvider(
+          create: (context) => SignOutCubit(authRepo:  getIt<AuthRepo>()),
+        ),
+      ],
       child: Scaffold(
         body: Builder(builder: (context) {
           return BlocConsumer<SignupCubit, SignupState>(
             listener: (BuildContext context, state) {
               if (state is SignupSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text('Account created successfully'),
+                  backgroundColor: Colors.green,
+
+                ));
+                isLoading = false;
               } else if (state is SignupFailure) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text(state.errorMessage),
@@ -78,13 +113,14 @@ class SignupPage extends StatelessWidget {
                               'Signup',
                               style: Styles.headingText40,
                             ),
-                            /*  NameTextField(
-                      i: userNameInput, NameController: userNameController),
-                  NameTextField(
-                      i: firstNameInput, NameController: firstNameController),
-                  NameTextField(
-                      i: lastNameInput, NameController: lastNameController),
-                  Padding(padding: EdgeInsets.only(top: 30.h)),*/
+                            NameTextField(
+                                i: userNameInput,
+                                NameController: userNameController),
+                            // NameTextField(
+                            //     i: firstNameInput, NameController: firstNameController),
+                            // NameTextField(
+                            //     i: lastNameInput, NameController: lastNameController),
+                            Padding(padding: EdgeInsets.only(top: 30.h)),
                             EmailTextField(
                                 emailCotroller: emailController,
                                 label: 'Email'),
@@ -93,6 +129,15 @@ class SignupPage extends StatelessWidget {
                                 passwordController: passwordController,
                                 label: 'Password',
                                 page: 'Signup'),
+
+                            UserRoleSelector(
+                              selectedRole: selectedRole,
+                              onRoleSelected: (role) {
+                                setState(() {
+                                  selectedRole = role;
+                                });
+                              },
+                            ),
                             Padding(padding: EdgeInsets.only(top: 30.h)),
                             Buttons(
                               text: 'Register',
@@ -100,13 +145,45 @@ class SignupPage extends StatelessWidget {
                                 if (formKey.currentState!.validate()) {
                                   BlocProvider.of<SignupCubit>(context)
                                       .createUserwithEmailandPassword(
-                                    email: emailController.text,
-                                    password: passwordController.text,
-                                  );
+                                      email: emailController.text,
+                                      password: passwordController.text,
+                                      userName: userNameController.text,
+                                      userRole:
+                                      selectedRole ?? 'Developer');
                                 }
                               },
                             ),
-                            HaveAccount(have: 'Have', page: 'Login'),
+                            Padding(padding: EdgeInsets.only(top: 10.h)),
+                            BlocConsumer<SignOutCubit, SignOutState>(
+                              listener: (context, state) {
+                                if (state is SignOutLoading) {
+                                  isLoading = true;
+                                }
+                                else if (state is SignOutSuccess) {
+                                  isLoading = false;
+                                  Navigator.pushReplacement(context,
+                                      MaterialPageRoute(
+                                          builder: (context) => LoginPage()));
+                                }
+                                else if (state is SignOutFailure) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(state.errorMessage),
+                                        backgroundColor: Colors.red,
+                                      ));
+                                  isLoading = false;
+                                }
+                              },
+                              builder: (context, state) {
+                                return Buttons(
+                                    text: 'Sign out',
+                                    onPressedCallBack: () async {
+                                      BlocProvider.of<SignOutCubit>(context)
+                                          .SignOut();
+                                    });
+                              },
+                            ),
+                            // HaveAccount(have: 'Have', page: 'Login'),
                           ],
                         ),
                       ),

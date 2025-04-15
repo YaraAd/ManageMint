@@ -31,13 +31,13 @@ class _DatePickerFieldState extends State<DatePickerField> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Colors.blue, // Header background color
-              onPrimary: Colors.white, // Header text color
-              onSurface: Colors.black, // Body text color
+              primary: Colors.blue,
+              onPrimary: Colors.black,
+              onSurface: Colors.black,
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                foregroundColor: Colors.blue, // Button text color
+                foregroundColor: Colors.blue,
               ),
             ),
           ),
@@ -48,7 +48,8 @@ class _DatePickerFieldState extends State<DatePickerField> {
 
     if (selected != null) {
       setState(() {
-        widget.controller.text = "${selected.year}-${selected.month.toString().padLeft(2, '0')}-${selected.day.toString().padLeft(2, '0')}";
+        widget.controller.text =
+        "${selected.year}-${selected.month.toString().padLeft(2, '0')}-${selected.day.toString().padLeft(2, '0')}";
       });
     }
   }
@@ -56,15 +57,23 @@ class _DatePickerFieldState extends State<DatePickerField> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      controller: widget.controller,
-      readOnly: true,
-      onTap: _selectDate,
-      decoration: InputDecoration(
-        labelText: widget.labelText,
-        border: const OutlineInputBorder(),
-        suffixIcon: const Icon(Icons.calendar_today),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-      ),
-    );
-  }
+        controller: widget.controller,
+        readOnly: true,
+        onTap: _selectDate,
+        style: TextStyle(
+          color: Colors.black
+        ),
+        decoration: InputDecoration(
+            labelText: widget.labelText,
+             fillColor: Colors.black,
+            labelStyle: TextStyle(
+              color: Colors.black
+            ),
+            border: const OutlineInputBorder(),
+            suffixIcon: const Icon(Icons.calendar_today),
+            contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            ),
+        );
+    }
 }
